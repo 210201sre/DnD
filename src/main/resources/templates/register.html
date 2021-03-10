@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+<title>Dungeon and Dragons RolePlay</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+	<h1 style='text-align: center;'>Dungeons & Dragons Role-Playing</h1>
+	<form action="#" th:action="@{/dungeons-and-dragons/register}" th:object="${registerTemplate}" method="post">
+		<p style="text-align: center;">Username: <input type="text" th:field="*{username}"/></p>
+		<p style="text-align: center;">Email: <input type="text" th:field="*{email}"/></p>
+		<p style="text-align: center;">Password: <input type="text" th:field="*{password}"/></p>
+		<p style="text-align: center;">Re-type Password: <input type="text" th:field="*{passwordRetyped}"/></p>
+		<p style="text-align: center;"><input type="submit" value="Register"/></p>
+	</form>
+</body>
+</html>

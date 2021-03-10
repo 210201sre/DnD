@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title th:text="${username}"></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<script>
+	function info(event){
+		location.href="/dungeons-and-dragons/users/"+event+"/info";
+	}
+</script>
+<body th:data-username="${username}">
+	<table style='width: 100%'>
+		<tr>
+			<th style='width: 80%; text-align: left;'>Active Sessions:</th>
+			<th style='width: 20%;' colspan=2 th:text="'Hello '+${username}+'!'"></th>
+		</tr>
+		<tr>
+			<td style='height: max-content;'>
+				<div>Active Sessions:</div>
+			</td>
+			<td style='vertical-align: top;'>
+				<table style="width:100%;">
+					<tr style='vertical-align: top;'>
+						<td style="text-align: right;">
+							<form action="/dungeons-and-dragons/logout" method="post">
+								<input type="submit" value="Logout"/>
+							</form>
+						</td>
+						<td>
+							<input type="button" value="Settings" th:onclick="info([[${username}]]);">
+						</td>
+					</tr>
+					<tr>
+						<th colspan='2' style='text-align: center;'>Friends:</th>
+					</tr>
+					<tr>
+						<td colspan='2' style='text-align: center;'>
+							<div th:text="${friends}"></div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
