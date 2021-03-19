@@ -17,6 +17,18 @@ pipeline{
             }
         }
 
+        stage('Sonar Quality Analysis'){
+            withSonarQubeEnv(credentialsId: 'sonar-token', installationNaame: 'sonarcloud'){
+                sh 'mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
+            }
+        }
+
+        stage('Wait for Quality Gate'){
+            timeout(time: 30, unit: 'MINUTES'){
+                def qg = waitForQualityGate abortPipeline: true
+            }
+        }
+
         stage('Push Docker Image'){
             when{
                 // Only execute the docker push state if we are on the master branch
@@ -31,6 +43,13 @@ pipeline{
                     }
                 }
             }
+        }
+    }
+
+    post{
+        always{
+            // can use the previousl create quality gate variable
+            // can include the results as part of a fiscord send instruction
         }
     }
 }

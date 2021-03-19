@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dungeons-and-dragons-canary
+  namespace: jonathan-nunez
+  labels:
+    app: dungeons-and-dragons
+spec:
+  replicas: $CANARY_REPLICAS
+  selector:
+    matchLabels:
+      app: dungeons-and-dragons
+      track: canary 
+      # track label will be used to differentiate the pods from the production
+      # vs the canary
+  template:
+    metadata:
+      namespace: jonathan-nunez
+      labels:
+        app: dungeons-and-dragons
+        track: canary
+    spec:
+      volumes:
+      - name: config
+        configMap:
+          name: fluent-conf
+      containers:
+      - name: fluentd
+        ports:
+        - containerPort: 24224
+        image: grafana/fluent-plugin-loki:latest
+        imagePullPolicy: IfNotPresent # optional, is default value
+        env:
+        - name: LOKI_URL
+          value: http://loki:3100 #uses the loki service name as the localhost for easy access
+        volumeMounts:
+        - name: config # use the same name as the name for the volumes we described
+          mountPath: /fluentd/etc/fluent.conf
+          # path inside the container we will mount to
+          # the destination
+          subPath: fluent.conf
+          # path inside the volume we are mounting from
+          # the source
+      - name: dungeons-and-dragons
+        image: $DOCKER_IMAGE_NAME:$GIT_COMMIT
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: jonathan-db
+              key: url
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jonathan-db
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jonathan-db
+              key: password
+        imagePullPolicy: Always #Optional

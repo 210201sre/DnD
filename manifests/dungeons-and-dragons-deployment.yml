@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dungeons-and-dragons
+  labels:
+    app: dungeons-and-dragons
+  namespace: jonathan-nunez
+spec:
+  selector:
+    matchLabels:
+      app: dungeons-and-dragons
+  replicas: 1
+  template:
+    # Describes the pod to be produced by this deployment
+    # nested maifest for a pod
+    # nested manifest do not need to include a kind or apiversion
+    # but they do need to indlcude metadata and spec
+    metadata:
+      namespace: jonathan-nunez
+      labels:
+        app: dungeons-and-dragons
+    spec:
+      volumes:
+      - name: config
+        configMap:
+          name: fluent-conf
+      containers:
+      - name: fluentd
+        ports:
+        - containerPort: 24224
+        image: grafana/fluent-plugin-loki:latest
+        imagePullPolicy: IfNotPresent # optional, is default value
+        env:
+        - name: LOKI_URL
+          value: http://loki:3100 #uses the loki service name as the localhost for easy access
+        volumeMounts:
+        - name: config # use the same name as the name for the volumes we described
+          mountPath: /fluentd/etc/fluent.conf
+          # path inside the container we will mount to
+          # the destination
+          subPath: fluent.conf
+          # path inside the volume we are mounting from
+          # the source
+      - name: dungeons-and-dragons
+        image: eilonwy/dungeons-and-dragons:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: jonathan-db
+              key: url
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jonathan-db
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jonathan-db
+              key: password
+        imagePullPolicy: Always #Optional
